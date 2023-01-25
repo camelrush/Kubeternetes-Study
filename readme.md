@@ -76,8 +76,8 @@
 ------
 #### 以下、課題・理解不足
 
-  - <font color=red>「デプロイするのに使われる」がよくわからない。Master Nodeがそれを担う？それ以外のNode（Worker Node?）は、デプロイ先と解釈しているが違うのか？</font>
-  - <font color=red>Master以外のノード(Worker Node?)と、後述のReplicaSet、Deploymentを使用したデプロイの関係がわからない。後述のリソースを読み進めると、Containerの集まりであるPodを、Deploymentを使ってデプロイすると理解している。が、ここの説明にNodeは出てこない。デプロイ先として指定するものではないのか？</font>
+  - <i><u>「デプロイするのに使われる」がよくわからない。Master Nodeがそれを担う？それ以外のNode（Worker Node?）は、デプロイ先と解釈しているが違うのか？ </i></u>
+  - <i><u>Master以外のノード(Worker Node?)と、後述のReplicaSet、Deploymentを使用したデプロイの関係がわからない。後述のリソースを読み進めると、Containerの集まりであるPodを、Deploymentを使ってデプロイすると理解している。が、ここの説明にNodeは出てこない。デプロイ先として指定するものではないのか？</i></u>
   - Master Nodeのコンポーネント内容は、ほとんど理解できていない。
   - AKSで構成した場合、このMaster NodeがAKSクラスタとなる、という認識であっているか？
   - AKSなりEKSで実際に構築してみないと、オンプレミスとの違いはわからない・・・。

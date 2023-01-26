@@ -56,28 +56,30 @@
 <br>
 
 ### Pod
-- 単体または複数のコンテナを一纏めにした単位。Kubernetesでのデプロイ、スケーリングはこの単位で操作する。
+- 単体または複数のコンテナを一纏めにした単位。~~Kubernetesでのデプロイ、スケーリングはこの単位で操作する。~~ (デプロイは、後述のDeploymentで操作する。Pod自体の定義は、最小単位と捉えるのが良さそう）
 - 複数コンテナが密結合を望ましい構成の場合には、複数コンテナをPodとしてまとめる。WebサーバとWebAppサーバ等。
 
 <br>
 
 ### Node
 - Kubernetesのクラスタ下にあるリソースの集合体。<u>コンテナをデプロイするのに使用される</u>
-- Kubernetesクラスタには、最低でも一つの「Master Node」が存在し、n個のMaster Nodeと、m個のそれ以外のNodeに分かれる。
-  ![cluster](./assets/img/cluster.jpg)
-- Master Nodeには、次の管理コンポーネントが存在する。
+- Kubernetesクラスタには、最低でも一つの「Control Plane」~~「Master Node」~~ が存在し、n個のControl Planeと、m個のそれ以外のNodeに分かれる。(Master Nodeというのは、古い呼び方らしい)
+  ![cluster](./assets/img/cluster.png)
+- Control Planeには、次の管理コンポーネントが存在する。
   |コンポーネント名|役割|
   |--|--|
   |kube-apiserver|KubernetesのAPIを公開するコンポーネント。kubetctlからのリソースの役割を受け付ける|
   |etcd|高可用性を備えた分散キーバリューストアで、Kubernetesクラスタのバッキングストアとして利用される|
   |kube-scheduler|Nodeを監視し、コンテナを配置する最適なNodeを選択する。|
   |kube-controller-manager|リソースを制御するコントローラーを実行する|
-- 一般的には、Master Nodeは３台配置して単一障害点とならないように構成するとのこと。  
+- 一般的には、Control Planeは３台配置して単一障害点とならないように構成するとのこと。  
 ------
 #### 以下、課題・理解不足
 
-  - <i><u>「デプロイするのに使われる」がよくわからない。Master Nodeがそれを担う？それ以外のNode（Worker Node?）は、デプロイ先と解釈しているが違うのか？ </i></u>
-  - <i><u>Master以外のノード(Worker Node?)と、後述のReplicaSet、Deploymentを使用したデプロイの関係がわからない。後述のリソースを読み進めると、Containerの集まりであるPodを、Deploymentを使ってデプロイすると理解している。が、ここの説明にNodeは出てこない。デプロイ先として指定するものではないのか？</i></u>
+  - <i><u>「デプロイするのに使われる」がよくわからない。Control Planeがそれを担う？それ以外のNode（Worker Node?）は、デプロイ先と解釈しているが違うのか？ </i></u>
+  - <i><u>Master以外のノード(Worker Node?)と、後述のReplicaSet、Deploymentを使用したデプロイの関係がわからない。後述のリソースを読み進めると、Containerの集まりであるPodを、Deploymentを使ってデプロイすると理解している。が、ここの説明にNodeは出てこない。デプロイ先として指定するものではないのか？</i></u>  
+
+    → あっている。Control Plane(AzureではAKSが担当)が、ワーカノードに対してデプロイを行う。デプロイ先は、各種yamlファイルにある[「Node Selector」で指定する](https://kubernetes.io/ja/docs/concepts/scheduling-eviction/assign-pod-node/)が指定する。例えば、GPUのプラットフォームに配置する場合や、専有(Dedecated)に配置するといった場合。指定しなければ、自動で配置される。
   - Master Nodeのコンポーネント内容は、ほとんど理解できていない。
   - AKSで構成した場合、このMaster NodeがAKSクラスタとなる、という認識であっているか？
   - AKSなりEKSで実際に構築してみないと、オンプレミスとの違いはわからない・・・。

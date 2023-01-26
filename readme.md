@@ -3,6 +3,7 @@
 Kubernetesの理解をまとめています。この内容は、以下の書籍の、第５章「Kubernetes入門」に沿って理解を進めています。書籍が古い(2018年)ため、一部用語が古いといったことがあるようです。（✖️ Master Node　→　◯ Control Plane）
 
 [Docker/Kubernetes 実践コンテナ開発入門](https://gihyo.jp/book/2018/978-4-297-10033-9)
+
 ![book](./assets/img/book.jpg)
 
 <br>

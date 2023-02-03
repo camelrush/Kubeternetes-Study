@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      # template...app と同じ名前である必要がある
+      app: nginx
+  template:
+    metadata:
+      labels:
+        # matchLabels と同じ名前である必要がある
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.16

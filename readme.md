@@ -648,6 +648,61 @@ Kubernetesの理解をまとめています。この内容は、以下の書籍�
     # kubectl create secret generic <secret名> --from-file=<キー>=<値>
     $ kubectl create secret generic mysecret --from-file=data.csv=./data.csv
 
+- service
+  - Podの集合をネットワークServiceとして抽象化するもの
+  - DNSを提供して同じ名前で参照できるようにする、負荷分散を行うためのもの
+    - 構成  
+      ```yaml
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: my-app
+      spec:
+        selector:             # サービスとして後悔するPodの名前を選択  
+          app: MyApp
+        ports:
+        - protocol: TCP
+          port: 80            # Serviceとして公開するポート
+          targetPort: 80      # pod側のポート
+      ```
+    - 操作方法
+      ```sh
+      # myappをデプロイ(labels=MyApp)
+      $ kubectl apply -f pod-my-app.yaml
+
+      # yourappをデプロイ(labels=YourApp)
+      $ kubectl apply -f pod-your-app.yaml
+
+      # これから作るServiceのSelector指定のPodが存在するかを確認する
+      $ kubectl get pod --selector app=MyApp
+
+      # Servieをデプロイ
+      $ kubectl apply -f service-my-app.yaml
+
+      # Serviceを確認
+      $ kubectl get service
+      NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+      kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP   13d  # ← こちらは無関係
+      my-app       ClusterIP   10.103.211.46   <none>        80/TCP    6s
+
+      # Service提供によって、Endpoints(ip)が払い出されるので内容を確認
+      $ kubectl get endpoints my-app               
+      NAME     ENDPOINTS      AGE
+      my-app   10.1.0.72:80   2m51s
+
+      # podに対しても、Endpointsが適用されていることを確認
+      $ kubectl get pod --selector app=MyApp -o wide
+      NAME     READY   STATUS    RESTARTS   AGE     IP          NODE             NOMINATED NODE   READINESS GATES
+      my-app   1/1     Running   0          5m28s   10.1.0.72   docker-desktop   <none>           <none>
+
+      # ポートフォワードして、サービスにアクセスできるようにする。  
+      $ kubectl port-forward svc/my-app 8080:80 
+      ```
+
+    - ブラウザからアクセスして確認する。
+  
+      ![portforward](./assets/img/portforward.jpg)
+
 - 補足：状況監視のため、macであればwatchコマンドが良い。
   - インストールは、`brew install watch`
   - 後続して指定した命令を定期的に実行する。

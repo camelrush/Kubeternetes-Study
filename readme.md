@@ -711,6 +711,118 @@ Kubernetesの理解をまとめています。この内容は、以下の書籍�
     - `while ($true -eq $true) { 実行させたいコマンド ; sleep 1 ; clear}`
 
 
+
+### demo(実践編)
+
+  - 全景
+
+    ![all_structure](assets/img/all_structure.jpg)
+
+#### databaseを作る
+
+  - database構成
+
+    ![database_structure](assets/img/database_structure.jpg)
+
+  - 実行コマンド
+
+      ```sh
+      # namespaceの作成
+      $ kubectl apply -f mysql-namespace.yaml
+
+      # mysqlデータベースの作成(datbase namespaceへ)
+      $ kubectl apply -f ./mysql-deployment.yaml -n database
+
+      # mysqlへログイン
+      $ kubectl exec -n database -it mysql-686888c78f-546p2 -- mysql -uroot -ppassword
+
+      # データベースの一覧を取得し、test_dbができていることを確認
+      mysql>show databases;
+      +--------------------+
+      | Database           |
+      +--------------------+
+      | information_schema |
+      | mysql              |
+      | performance_schema |
+      | sys                |
+      | test_db            |
+      +--------------------+
+      5 rows in set (0.02 sec)
+
+      # 抜ける
+      mysql>exit
+
+      # サービス公開するためのyamlを作る
+      $ kubectl create service clusterip mysql --tcp=3306 --dry-run=client -n database -o yaml > mysql-service.yaml
+
+      (yamlの中身)
+      apiVersion: v1
+      kind: Service
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: mysql
+        name: mysql
+        namespace: database
+      spec:
+        ports:
+        - name: "3306"
+          port: 3306
+          protocol: TCP
+          targetPort: 3306
+        selector:
+          app: mysql
+        type: ClusterIP
+      status:
+        loadBalancer: {}
+
+      # serviceを適用する。
+      kubectl apply -f mysql-service.yaml -n database
+      ```
+
+#### applicationを作る
+
+  - application構成
+
+    ![application_structure](assets/img/application_structure.jpg)
+
+  - 実行コマンド
+
+      ```sh
+      # namespace名を変数に設定
+      $ namespace=camelrush-ns
+
+      # namespaceを作成
+      $ kubectl create namespace $namespace
+
+      # sample-app用のdeployment.yamlを作成する
+      $ kubectl create deploy sample-app --image=ghcr.io/nakamasato/fastapi-sample:v1.0 --dry-run=client -o yaml > sample-app-deployment.yaml
+
+      # (生成された`sample-app-deployment.yaml`に、以下の記述を埋め込む)
+        ：
+        - image: ghcr.io/nakamasato/fastapi-sample:v1.0
+          name: fastapi-sample
+          # ↓ ここから
+          envFrom:
+          - configMapRef:
+              name: sample-app
+          - secretRef:
+              name: sample-app
+          # ↑ ここまで
+          resources: {}
+        ：
+
+      # env.txtの内容をもとに、configMap.yamlを作成する
+      $ kubectl create cm sample-app --from-env-file=env.txt --dry-run=client -o yaml > sample-app-configmap.yaml > sample-app-configmap.yaml
+
+      # mysqlの接続パスワードを、secretとして作成する
+      $ kubectl create secret generic sample-app --from-literal=MYSQL_PASSWORD=password --dry-run=client -o yaml > sample-app-secret.yaml
+
+      # 生成したyaml群を全てデプロイする。
+      $ kubectl apply -f sample-app-deployment.yaml,sample-app-configmap.yaml,sample-app-secret.yaml -n $namespace
+
+      ```
+
 ## Azure（AKS）の関連サービス
 - Node Pool
 - Azure AD Identity

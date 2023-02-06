@@ -18,10 +18,9 @@ spec:
         app: mysql
     spec:
       containers:
-      - image: mysql:5.7
+      - image: mysql/mysql-server:5.7
         name: mysql
         resources: {}
-        status: {}
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: password

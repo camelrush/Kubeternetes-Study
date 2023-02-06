@@ -599,7 +599,54 @@ Kubernetesの理解をまとめています。この内容は、以下の書籍�
       tanaka,2,tanaka@example.com,9skjeldod
       ```
 - secret
+  - 機密性が高い設定データをキーと値のペアで保存し、Podから参照させるもの
 
+  - Secretには、いくつかの種類がある([公式サイト](https://kubernetes.io/ja/docs/concepts/configuration/secret/#secret-types)を参照)。  
+
+    ![secrettype](./assets/img/secrettype.jpg)
+  
+    - Opaque（オペイク）という記述が最もよく使われる。ユーザが定義したデータをSecretに保存するもの。
+
+  - 構文
+    ``` yaml
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: mysecret
+      namespace: default
+    type: Opaque      # type
+    data:
+      username: YWRtaW4= # admin
+      password: MWYyZDFlMmU2N2Rm # 1f2d1e2e67df
+    ```
+  - data部分は、以下のいずれかで書くことができる。
+    - `data` : base64 encodeデータ
+      ```yaml
+      data:
+        username: YWRtaW4= # admin
+        password: MWYyZDFlMmU2N2Rm # 1f2d1e2e67df
+      ``` 
+    - `stringData` : plainデータ
+      ```yaml
+      stringData:
+        username: admin
+        password: 1f2d1e2e67df
+      ``` 
+  - ファイル記述のパターンは、[こちら](./assets/sample/secret/)を参照。
+  - base64でのエンコードする方法
+    ```sh
+    # base64 encode
+    $ echo -n 'admin' | base64
+    YWRtaW4=  # encode結果
+
+    # base64 decode
+    $ echo -n 'YWRtaW4=' | base64 --decode
+    admin%    # %は不要
+    ```
+  - secretをファイルから直接生成する方法
+    ``` sh
+    # kubectl create secret generic <secret名> --from-file=<キー>=<値>
+    $ kubectl create secret generic mysecret --from-file=data.csv=./data.csv
 
 - 補足：状況監視のため、macであればwatchコマンドが良い。
   - インストールは、`brew install watch`

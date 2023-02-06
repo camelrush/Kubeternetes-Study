@@ -28,5 +28,5 @@ spec:
           value: test_db
         - name: MYSQL_USER
           value: sample_app
-        - name: NYSQL_PASSWORD
+        - name: MYSQL_PASSWORD
           value: password
